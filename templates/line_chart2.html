@@ -1,0 +1,1180 @@
+{% extends 'header1.html'%}
+{% block content %}
+<!-- <link rel="stylesheet" href= "/static/css/style-starter1.css"> -->
+<!-- <link href="//fonts.googleapis.com/css?family=Work+Sans:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet"> -->
+<!-- <meta charset="utf-8" /> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script> -->
+
+<script src="/static/js/Chart.min.js"></script>
+
+<style>
+  #column1 { 
+    background: #D1FF36;  
+
+    position: absolute;
+    overflow-y: scroll;
+    height: 350px;
+    width: 250px;
+    color: antiquewhite;
+  } 
+  #column2 { 
+    background: #D1FF36;  
+    position: absolute;
+    overflow-y: scroll;
+    height: 350px;
+    width: 250px;
+  } 
+  #column3 { 
+    background: #D1FF36; 
+    position: absolute;
+    overflow-y: scroll;
+    height: 350px;
+    width: 250px;
+  }
+  #column4 { 
+    background: #D1FF36;
+    position: absolute;
+    overflow-y: scroll;
+    height: 350px;
+    width: 300px;
+  } 
+  table { 
+    width: 750px; 
+    border-collapse: collapse; 
+    margin:50px auto;
+    }
+  
+  /* Zebra striping */
+  tr:nth-of-type(odd) { 
+    background: #eee; 
+    }
+  
+  th { 
+    background: #3498db; 
+    color: white; 
+    font-weight: bold; 
+    }
+  
+  td, th { 
+    padding: 10px; 
+    border: 1px solid #ccc; 
+    text-align: left; 
+    font-size: 18px;
+    }
+  
+  /* 
+  Max width before this PARTICULAR table gets nasty
+  This query will take effect for any screen smaller than 760px
+  and also iPads specifically.
+  */
+  @media 
+  only screen and (max-width: 760px),
+  (min-device-width: 768px) and (max-device-width: 1024px)  {
+  
+    table { 
+        width: 100%; 
+    }
+  
+    /* Force table to not be like tables anymore */
+    table, thead, tbody, th, td, tr { 
+      display: block; 
+    }
+    
+    /* Hide table headers (but not display: none;, for accessibility) */
+    thead tr { 
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+    }
+    
+    tr { border: 1px solid #ccc; }
+    
+    td { 
+      /* Behave  like a "row" */
+      border: none;
+      border-bottom: 1px solid #eee; 
+      position: relative;
+      padding-left: 50%; 
+    }
+  
+    td:before { 
+      /* Now like a table header */
+      position: absolute;
+      /* Top/left values mimic padding */
+      top: 6px;
+      left: 6px;
+      width: 45%; 
+      padding-right: 10px; 
+      white-space: nowrap;
+      /* Label the data */
+      content: attr(data-column);
+  
+      color: #000;
+      font-weight: bold;
+    }
+  
+  }
+</style>
+
+<div class="breadcrumb-agile">
+  <div aria-label="breadcrumb" style="color: #000000;">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/" style="color: #000000;">Back</a>
+      </li>
+      <li class="breadcrumb-item" style="color: #000000;" aria-current="page"> Time Series Comparison Graph</li>
+      <a class="breadcrumb-item" style="color: #f44336;" href="/fgraph2" aria-current="page">Future Time Series Comparison Graph</a>
+    </ol>
+  </div>
+</div>
+
+  <center><h4>Future Time Series Comparison Graph of</h4></center>
+    <center><h4>{{stockname}} and {{symbolis}}
+    {{stockname2}} {{symbolis2}}</h4></center>
+	<!-- <div style="width:95%;padding:5%"><canvas id="myChart" width="600" height="400"></canvas> </div> -->
+  <body>
+		<div style="width:100%; display: flex;">
+      <div  class="m-3 col"><b>LSTM Prediction</b><canvas id="myChart1" width="618" height="308"></canvas></div>
+      <div  class="m-3 col"><b>LSTM Prediction Month Vise</b><canvas id="myChart" width="618" height="308" ></canvas></div>
+    </div>
+    <div style="width:100%; display: flex;">
+      <div  class="m-3 col"><b>LSTM Prediction Results</b>
+        <table>
+          <tr>
+              <th>Key</th>
+              <th>Value</th>
+          </tr>
+          {% for key, value in predictresult.items() %}
+          <tr>
+              <td>{{ key }}</td>
+              <td>{{ value }}</td>
+          </tr>
+          {% endfor %}
+      </table>
+
+      </div>
+    </div>
+
+
+    <div style="width:100%; display: flex;">
+      <div  class="m-3 col"><b>Bidirectional LSTM Prediction</b><canvas id="myChart2" width="618" height="308"></canvas></div>
+      <div  class="m-3 col"><b>Bidirectional Prediction Month Vise</b><canvas id="myChart12" width="618" height="308" ></canvas></div>
+    </div>
+    <div style="width:100%; display: flex;">
+      <div  class="m-3 col"><b>Bidirectional LSTM Prediction</b>
+        <table>
+          <tr>
+              <th>Key</th>
+              <th>Value</th>
+          </tr>
+          {% for key, value in predictresult2.items() %}
+          <tr>
+              <td>{{ key }}</td>
+              <td>{{ value }}</td>
+          </tr>
+          {% endfor %}
+      </table>
+
+      </div>
+    </div>
+
+    <div style="width:100%; display: flex;">
+      <div  class="m-3 col"><b>Bidirectional GRU Prediction</b><canvas id="myChart3" width="618" height="308"></canvas></div>
+      <div  class="m-3 col"><b>Bidirectional GRU Prediction Month Vise</b><canvas id="myChart13" width="618" height="308" ></canvas></div>
+    </div>
+    <div style="width:100%; display: flex;">
+      <div  class="m-3 col"><b>Bidirectional GRU Prediction</b>
+        <table>
+          <tr>
+              <th>Key</th>
+              <th>Value</th>
+          </tr>
+          {% for key, value in predictresult3.items() %}
+          <tr>
+              <td>{{ key }}</td>
+              <td>{{ value }}</td>
+          </tr>
+          {% endfor %}
+      </table>
+
+      </div>
+    </div>
+
+
+
+
+    <div style="width:100%; display: flex;">
+      <div  class="m-3 col"><b>GRU Prediction</b><canvas id="myChart4" width="618" height="308"></canvas></div>
+      <div  class="m-3 col"><b>GRU Prediction  Month Vise</b><canvas id="myChart14" width="618" height="308" ></canvas></div>
+    </div>
+    <div style="width:100%; display: flex;">
+      <div  class="m-3 col"><b>GRU Prediction Results</b>
+        <table>
+          <tr>
+              <th>Key</th>
+              <th>Value</th>
+          </tr>
+          {% for key, value in predictresult4.items() %}
+          <tr>
+              <td>{{ key }}</td>
+              <td>{{ value }}</td>
+          </tr>
+          {% endfor %}
+      </table>
+
+
+      </div>
+    </div>
+
+
+
+    <div style="width:100%; display: flex;">
+      <div  class="m-3 col"><b>CNN LSTM Prediction</b><canvas id="myChart5" width="618" height="308"></canvas></div>
+      <div  class="m-3 col"><b>CNN LSTM Prediction Month Vise</b><canvas id="myChart15" width="618" height="308" ></canvas></div>
+    </div>
+    <div style="width:100%; display: flex;">
+      <div  class="m-3 col"><b>CNN LSTM Prediction Results</b>
+        <table>
+          <tr>
+              <th>Key</th>
+              <th>Value</th>
+          </tr>
+          {% for key, value in predictresult5.items() %}
+          <tr>
+              <td>{{ key }}</td>
+              <td>{{ value }}</td>
+          </tr>
+          {% endfor %}
+      </table>
+
+
+      </div>
+    </div>
+
+
+
+    <div style="width:100%; display: flex;">
+      <div  class="m-3 col"><b>CNN GRU Prediction</b><canvas id="myChart6" width="618" height="308"></canvas></div>
+      <div  class="m-3 col"><b>CNN GRU Prediction Month Vise</b><canvas id="myChart16" width="618" height="308" ></canvas></div>
+    </div>
+
+    <div style="width:100%; display: flex;">
+      <div  class="m-3 col"><b>CNN GRU Prediction Results</b>
+        <table>
+          <tr>
+              <th>Key</th>
+              <th>Value</th>
+          </tr>
+          {% for key, value in predictresult6.items() %}
+          <tr>
+              <td>{{ key }}</td>
+              <td>{{ value }}</td>
+          </tr>
+          {% endfor %}
+      </table>
+
+
+      </div>
+    </div>
+  
+  
+  </body>
+    <!-- LSTM Prediction -->
+
+  <script>
+      // Global parameters:
+      // do not resize the chart canvas when its container does (keep at 600x400px)
+    Chart.defaults.global.responsive = true;
+
+      // define the chart data
+      var chartData = {
+      labels : [{% for item in labels1 %}
+                   "{{item}}",
+                  {% endfor %}],
+      datasets : [{
+        label: '{{ legend }}',
+        fill: true,
+        lineTension: 0.1,
+        backgroundColor: "rgba(75,192,192,0.4)",
+        borderColor: "rgba(75,192,192,1)",
+        borderCapStyle: 'butt',
+        borderDash: [],
+        borderDashOffset: 0.0,
+        borderJoinStyle: 'miter',
+        pointBorderColor: "rgba(75,192,192,1)",
+        pointBackgroundColor: "#fff",
+        pointBorderWidth: 1,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: "rgba(75,192,192,1)",
+        pointHoverBorderColor: "rgba(220,220,220,1)",
+        pointHoverBorderWidth: 2,
+        pointRadius: 1,
+        pointHitRadius: 10,
+        data : [{% for item in values1 %}
+                      {{item}},
+                    {% endfor %}],
+        spanGaps: false
+      },
+      {
+        label: '{{ legend }}',
+        fill: true,
+        lineTension: 0.1,
+        backgroundColor: "rgba(80,180,196,0.5)",
+        borderColor: "rgba(255,0,0,1)",
+        borderCapStyle: 'butt',
+        borderDash: [],
+        borderDashOffset: 0.0,
+        borderJoinStyle: 'miter',
+        pointBorderColor: "rgba(255,0,0,1)",
+        pointBackgroundColor: "#fff",
+        pointBorderWidth: 1,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: "rgba(255,0,0,1)",
+        pointHoverBorderColor: "rgba(220,220,220,1)",
+        pointHoverBorderWidth: 2,
+        pointRadius: 1,
+        pointHitRadius: 10,
+        data : [{% for item in values1 %}
+                      {{item}},
+                    {% endfor %}],
+        spanGaps: false
+      }
+    ]
+    }
+
+      // get chart canvas
+    var holder = document.getElementById("myChart1");
+    var ctx = document.getElementById("myChart1").getContext("2d");
+
+      // create the chart using the chart canvas
+    var myChart1 = new Chart(ctx, {
+      type: 'line',
+      data: chartData,
+      options: {
+        tooltips: {
+          enabled: true,
+          mode: 'single',
+          callbacks: {
+            label: function(tooltipItems, data) {
+              return tooltipItems.yLabel + ' dollar';
+            }
+          }
+        },
+      }
+    });
+      
+ 
+  </script>
+
+  <script>
+    // Global parameters:
+    // do not resize the chart canvas when its container does (keep at 600x400px)
+    Chart.defaults.global.responsive = true;
+  
+    var dateLabels = [{% for item in labels1 %}
+    "{{item}}",
+      {% endfor %}];
+  
+      
+    var dataValues = [{% for item in values1 %}
+    {{ item }},
+  {% endfor %}];
+  
+     // Function to group data by month
+     function groupDataByMonth(labels, values) {
+      var groupedData = {};
+      for (var i = 0; i < labels.length; i++) {
+        var date = new Date(labels[i]);
+        var month = date.toLocaleString('default', { month: 'long' });
+        if (!groupedData[month]) {
+          groupedData[month] = 0;
+        }
+        groupedData[month] += values[i];
+      }
+      return {
+        labels: Object.keys(groupedData),
+        values: Object.values(groupedData)
+      };
+    }
+  
+    var groupedData = groupDataByMonth(dateLabels, dataValues);
+  
+    // Define the chart data using the grouped data
+    var chartData = {
+      labels: groupedData.labels,
+      datasets: [{
+        label: '{{ legend }}',
+        data: groupedData.values,
+        backgroundColor: 'rgba(75, 192, 192, 0.4)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1
+      }]
+    };
+  
+    // Get chart canvas
+    var ctx = document.getElementById('myChart').getContext('2d');
+  
+    // Create the chart using the chart canvas
+    var myChart = new Chart(ctx, {
+      type: 'bar',
+      data: chartData,
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      },
+    });
+  </script>
+
+  <!-- Bidirectional LSTM Prediction -->
+
+<script>
+  // Global parameters:
+  // do not resize the chart canvas when its container does (keep at 600x400px)
+Chart.defaults.global.responsive = true;
+
+  // define the chart data
+  var chartData = {
+  labels : [{% for item in labels2 %}
+               "{{item}}",
+              {% endfor %}],
+  datasets : [{
+    label: '{{ legend }}',
+    fill: true,
+    lineTension: 0.1,
+    backgroundColor: "rgba(75,192,192,0.4)",
+    borderColor: "rgba(75,192,192,1)",
+    borderCapStyle: 'butt',
+    borderDash: [],
+    borderDashOffset: 0.0,
+    borderJoinStyle: 'miter',
+    pointBorderColor: "rgba(75,192,192,1)",
+    pointBackgroundColor: "#fff",
+    pointBorderWidth: 1,
+    pointHoverRadius: 5,
+    pointHoverBackgroundColor: "rgba(75,192,192,1)",
+    pointHoverBorderColor: "rgba(220,220,220,1)",
+    pointHoverBorderWidth: 2,
+    pointRadius: 1,
+    pointHitRadius: 10,
+    data : [{% for item in values2 %}
+                  {{item}},
+                {% endfor %}],
+    spanGaps: false
+  },
+  {
+    label: '{{ legend }}',
+    fill: true,
+    lineTension: 0.1,
+    backgroundColor: "rgba(80,180,196,0.5)",
+    borderColor: "rgba(255,0,0,1)",
+    borderCapStyle: 'butt',
+    borderDash: [],
+    borderDashOffset: 0.0,
+    borderJoinStyle: 'miter',
+    pointBorderColor: "rgba(255,0,0,1)",
+    pointBackgroundColor: "#fff",
+    pointBorderWidth: 1,
+    pointHoverRadius: 5,
+    pointHoverBackgroundColor: "rgba(255,0,0,1)",
+    pointHoverBorderColor: "rgba(220,220,220,1)",
+    pointHoverBorderWidth: 2,
+    pointRadius: 1,
+    pointHitRadius: 10,
+    data : [{% for item in values2 %}
+                  {{item}},
+                {% endfor %}],
+    spanGaps: false
+  }
+]
+}
+
+  // get chart canvas
+var holder = document.getElementById("myChart2");
+var ctx = document.getElementById("myChart2").getContext("2d");
+
+  // create the chart using the chart canvas
+var myChart2 = new Chart(ctx, {
+  type: 'line',
+  data: chartData,
+  options: {
+    tooltips: {
+      enabled: true,
+      mode: 'single',
+      callbacks: {
+        label: function(tooltipItems, data) {
+          return tooltipItems.yLabel + ' dollar';
+        }
+      }
+    },
+  }
+});
+  
+
+</script>
+
+<script>
+  // Global parameters:
+  // do not resize the chart canvas when its container does (keep at 600x400px)
+  Chart.defaults.global.responsive = true;
+
+  var dateLabels = [{% for item in labels2 %}
+  "{{item}}",
+    {% endfor %}];
+
+    
+  var dataValues = [{% for item in values2 %}
+  {{ item }},
+{% endfor %}];
+
+   // Function to group data by month
+   function groupDataByMonth(labels, values) {
+    var groupedData = {};
+    for (var i = 0; i < labels.length; i++) {
+      var date = new Date(labels[i]);
+      var month = date.toLocaleString('default', { month: 'long' });
+      if (!groupedData[month]) {
+        groupedData[month] = 0;
+      }
+      groupedData[month] += values[i];
+    }
+    return {
+      labels: Object.keys(groupedData),
+      values: Object.values(groupedData)
+    };
+  }
+
+  var groupedData = groupDataByMonth(dateLabels, dataValues);
+
+  // Define the chart data using the grouped data
+  var chartData = {
+    labels: groupedData.labels,
+    datasets: [{
+      label: '{{ legend }}',
+      data: groupedData.values,
+      backgroundColor: 'rgba(75, 192, 192, 0.4)',
+      borderColor: 'rgba(75, 192, 192, 1)',
+      borderWidth: 1
+    }]
+  };
+
+  // Get chart canvas
+  var ctx = document.getElementById('myChart12').getContext('2d');
+
+  // Create the chart using the chart canvas
+  var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: chartData,
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    },
+  });
+</script>
+
+<!-- Bidirectional GRU Prediction -->
+
+<script>
+  // Global parameters:
+  // do not resize the chart canvas when its container does (keep at 600x400px)
+Chart.defaults.global.responsive = true;
+
+  // define the chart data
+  var chartData = {
+  labels : [{% for item in labels3 %}
+               "{{item}}",
+              {% endfor %}],
+  datasets : [{
+    label: '{{ legend }}',
+    fill: true,
+    lineTension: 0.1,
+    backgroundColor: "rgba(75,192,192,0.4)",
+    borderColor: "rgba(75,192,192,1)",
+    borderCapStyle: 'butt',
+    borderDash: [],
+    borderDashOffset: 0.0,
+    borderJoinStyle: 'miter',
+    pointBorderColor: "rgba(75,192,192,1)",
+    pointBackgroundColor: "#fff",
+    pointBorderWidth: 1,
+    pointHoverRadius: 5,
+    pointHoverBackgroundColor: "rgba(75,192,192,1)",
+    pointHoverBorderColor: "rgba(220,220,220,1)",
+    pointHoverBorderWidth: 2,
+    pointRadius: 1,
+    pointHitRadius: 10,
+    data : [{% for item in values3 %}
+                  {{item}},
+                {% endfor %}],
+    spanGaps: false
+  },
+  {
+    label: '{{ legend }}',
+    fill: true,
+    lineTension: 0.1,
+    backgroundColor: "rgba(80,180,196,0.5)",
+    borderColor: "rgba(255,0,0,1)",
+    borderCapStyle: 'butt',
+    borderDash: [],
+    borderDashOffset: 0.0,
+    borderJoinStyle: 'miter',
+    pointBorderColor: "rgba(255,0,0,1)",
+    pointBackgroundColor: "#fff",
+    pointBorderWidth: 1,
+    pointHoverRadius: 5,
+    pointHoverBackgroundColor: "rgba(255,0,0,1)",
+    pointHoverBorderColor: "rgba(220,220,220,1)",
+    pointHoverBorderWidth: 2,
+    pointRadius: 1,
+    pointHitRadius: 10,
+    data : [{% for item in values3 %}
+                  {{item}},
+                {% endfor %}],
+    spanGaps: false
+  }
+]
+}
+
+  // get chart canvas
+var holder = document.getElementById("myChart3");
+var ctx = document.getElementById("myChart3").getContext("2d");
+
+  // create the chart using the chart canvas
+var myChart3 = new Chart(ctx, {
+  type: 'line',
+  data: chartData,
+  options: {
+    tooltips: {
+      enabled: true,
+      mode: 'single',
+      callbacks: {
+        label: function(tooltipItems, data) {
+          return tooltipItems.yLabel + ' dollar';
+        }
+      }
+    },
+  }
+});
+  
+
+</script>
+<script>
+  // Global parameters:
+  // do not resize the chart canvas when its container does (keep at 600x400px)
+  Chart.defaults.global.responsive = true;
+
+  var dateLabels = [{% for item in labels3 %}
+  "{{item}}",
+    {% endfor %}];
+
+    
+  var dataValues = [{% for item in values3 %}
+  {{ item }},
+{% endfor %}];
+
+   // Function to group data by month
+   function groupDataByMonth(labels, values) {
+    var groupedData = {};
+    for (var i = 0; i < labels.length; i++) {
+      var date = new Date(labels[i]);
+      var month = date.toLocaleString('default', { month: 'long' });
+      if (!groupedData[month]) {
+        groupedData[month] = 0;
+      }
+      groupedData[month] += values[i];
+    }
+    return {
+      labels: Object.keys(groupedData),
+      values: Object.values(groupedData)
+    };
+  }
+
+  var groupedData = groupDataByMonth(dateLabels, dataValues);
+
+  // Define the chart data using the grouped data
+  var chartData = {
+    labels: groupedData.labels,
+    datasets: [{
+      label: '{{ legend }}',
+      data: groupedData.values,
+      backgroundColor: 'rgba(75, 192, 192, 0.4)',
+      borderColor: 'rgba(75, 192, 192, 1)',
+      borderWidth: 1
+    }]
+  };
+
+  // Get chart canvas
+  var ctx = document.getElementById('myChart13').getContext('2d');
+
+  // Create the chart using the chart canvas
+  var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: chartData,
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    },
+  });
+</script>
+
+<!-- GRU Prediction -->
+
+<script>
+  // Global parameters:
+  // do not resize the chart canvas when its container does (keep at 600x400px)
+Chart.defaults.global.responsive = true;
+
+  // define the chart data
+  var chartData = {
+  labels : [{% for item in labels4 %}
+               "{{item}}",
+              {% endfor %}],
+  datasets : [{
+    label: '{{ legend }}',
+    fill: true,
+    lineTension: 0.1,
+    backgroundColor: "rgba(75,192,192,0.4)",
+    borderColor: "rgba(75,192,192,1)",
+    borderCapStyle: 'butt',
+    borderDash: [],
+    borderDashOffset: 0.0,
+    borderJoinStyle: 'miter',
+    pointBorderColor: "rgba(75,192,192,1)",
+    pointBackgroundColor: "#fff",
+    pointBorderWidth: 1,
+    pointHoverRadius: 5,
+    pointHoverBackgroundColor: "rgba(75,192,192,1)",
+    pointHoverBorderColor: "rgba(220,220,220,1)",
+    pointHoverBorderWidth: 2,
+    pointRadius: 1,
+    pointHitRadius: 10,
+    data : [{% for item in values4 %}
+                  {{item}},
+                {% endfor %}],
+    spanGaps: false
+  },
+  {
+    label: '{{ legend }}',
+    fill: true,
+    lineTension: 0.1,
+    backgroundColor: "rgba(80,180,196,0.5)",
+    borderColor: "rgba(255,0,0,1)",
+    borderCapStyle: 'butt',
+    borderDash: [],
+    borderDashOffset: 0.0,
+    borderJoinStyle: 'miter',
+    pointBorderColor: "rgba(255,0,0,1)",
+    pointBackgroundColor: "#fff",
+    pointBorderWidth: 1,
+    pointHoverRadius: 5,
+    pointHoverBackgroundColor: "rgba(255,0,0,1)",
+    pointHoverBorderColor: "rgba(220,220,220,1)",
+    pointHoverBorderWidth: 2,
+    pointRadius: 1,
+    pointHitRadius: 10,
+    data : [{% for item in values4 %}
+                  {{item}},
+                {% endfor %}],
+    spanGaps: false
+  }
+]
+}
+
+  // get chart canvas
+var holder = document.getElementById("myChart4");
+var ctx = document.getElementById("myChart4").getContext("2d");
+
+  // create the chart using the chart canvas
+var myChart4 = new Chart(ctx, {
+  type: 'line',
+  data: chartData,
+  options: {
+    tooltips: {
+      enabled: true,
+      mode: 'single',
+      callbacks: {
+        label: function(tooltipItems, data) {
+          return tooltipItems.yLabel + ' dollar';
+        }
+      }
+    },
+  }
+});
+  
+
+</script>
+
+<script>
+  // Global parameters:
+  // do not resize the chart canvas when its container does (keep at 600x400px)
+  Chart.defaults.global.responsive = true;
+
+  var dateLabels = [{% for item in labels4 %}
+  "{{item}}",
+    {% endfor %}];
+
+    
+  var dataValues = [{% for item in values4 %}
+  {{ item }},
+{% endfor %}];
+
+   // Function to group data by month
+   function groupDataByMonth(labels, values) {
+    var groupedData = {};
+    for (var i = 0; i < labels.length; i++) {
+      var date = new Date(labels[i]);
+      var month = date.toLocaleString('default', { month: 'long' });
+      if (!groupedData[month]) {
+        groupedData[month] = 0;
+      }
+      groupedData[month] += values[i];
+    }
+    return {
+      labels: Object.keys(groupedData),
+      values: Object.values(groupedData)
+    };
+  }
+
+  var groupedData = groupDataByMonth(dateLabels, dataValues);
+
+  // Define the chart data using the grouped data
+  var chartData = {
+    labels: groupedData.labels,
+    datasets: [{
+      label: '{{ legend }}',
+      data: groupedData.values,
+      backgroundColor: 'rgba(75, 192, 192, 0.4)',
+      borderColor: 'rgba(75, 192, 192, 1)',
+      borderWidth: 1
+    }]
+  };
+
+  // Get chart canvas
+  var ctx = document.getElementById('myChart14').getContext('2d');
+
+  // Create the chart using the chart canvas
+  var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: chartData,
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    },
+  });
+</script>
+<!-- CNN LSTM Prediction-->
+
+
+<script>
+  // Global parameters:
+  // do not resize the chart canvas when its container does (keep at 600x400px)
+Chart.defaults.global.responsive = true;
+
+  // define the chart data
+  var chartData = {
+  labels : [{% for item in labels5 %}
+               "{{item}}",
+              {% endfor %}],
+  datasets : [{
+    label: '{{ legend }}',
+    fill: true,
+    lineTension: 0.1,
+    backgroundColor: "rgba(75,192,192,0.4)",
+    borderColor: "rgba(75,192,192,1)",
+    borderCapStyle: 'butt',
+    borderDash: [],
+    borderDashOffset: 0.0,
+    borderJoinStyle: 'miter',
+    pointBorderColor: "rgba(75,192,192,1)",
+    pointBackgroundColor: "#fff",
+    pointBorderWidth: 1,
+    pointHoverRadius: 5,
+    pointHoverBackgroundColor: "rgba(75,192,192,1)",
+    pointHoverBorderColor: "rgba(220,220,220,1)",
+    pointHoverBorderWidth: 2,
+    pointRadius: 1,
+    pointHitRadius: 10,
+    data : [{% for item in values5 %}
+                  {{item}},
+                {% endfor %}],
+    spanGaps: false
+  },
+  {
+    label: '{{ legend }}',
+    fill: true,
+    lineTension: 0.1,
+    backgroundColor: "rgba(80,180,196,0.5)",
+    borderColor: "rgba(255,0,0,1)",
+    borderCapStyle: 'butt',
+    borderDash: [],
+    borderDashOffset: 0.0,
+    borderJoinStyle: 'miter',
+    pointBorderColor: "rgba(255,0,0,1)",
+    pointBackgroundColor: "#fff",
+    pointBorderWidth: 1,
+    pointHoverRadius: 5,
+    pointHoverBackgroundColor: "rgba(255,0,0,1)",
+    pointHoverBorderColor: "rgba(220,220,220,1)",
+    pointHoverBorderWidth: 2,
+    pointRadius: 1,
+    pointHitRadius: 10,
+    data : [{% for item in values5 %}
+                  {{item}},
+                {% endfor %}],
+    spanGaps: false
+  }
+]
+}
+
+  // get chart canvas
+var holder = document.getElementById("myChart5");
+var ctx = document.getElementById("myChart5").getContext("2d");
+
+  // create the chart using the chart canvas
+var myChart5 = new Chart(ctx, {
+  type: 'line',
+  data: chartData,
+  options: {
+    tooltips: {
+      enabled: true,
+      mode: 'single',
+      callbacks: {
+        label: function(tooltipItems, data) {
+          return tooltipItems.yLabel + ' dollar';
+        }
+      }
+    },
+  }
+});
+  
+
+</script>
+
+<script>
+  // Global parameters:
+  // do not resize the chart canvas when its container does (keep at 600x400px)
+  Chart.defaults.global.responsive = true;
+
+  var dateLabels = [{% for item in labels5 %}
+  "{{item}}",
+    {% endfor %}];
+
+    
+  var dataValues = [{% for item in values5 %}
+  {{ item }},
+{% endfor %}];
+
+   // Function to group data by month
+   function groupDataByMonth(labels, values) {
+    var groupedData = {};
+    for (var i = 0; i < labels.length; i++) {
+      var date = new Date(labels[i]);
+      var month = date.toLocaleString('default', { month: 'long' });
+      if (!groupedData[month]) {
+        groupedData[month] = 0;
+      }
+      groupedData[month] += values[i];
+    }
+    return {
+      labels: Object.keys(groupedData),
+      values: Object.values(groupedData)
+    };
+  }
+
+  var groupedData = groupDataByMonth(dateLabels, dataValues);
+
+  // Define the chart data using the grouped data
+  var chartData = {
+    labels: groupedData.labels,
+    datasets: [{
+      label: '{{ legend }}',
+      data: groupedData.values,
+      backgroundColor: 'rgba(75, 192, 192, 0.4)',
+      borderColor: 'rgba(75, 192, 192, 1)',
+      borderWidth: 1
+    }]
+  };
+
+  // Get chart canvas
+  var ctx = document.getElementById('myChart15').getContext('2d');
+
+  // Create the chart using the chart canvas
+  var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: chartData,
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    },
+  });
+</script>
+
+<!-- Bidirectional GRU Prediction -->
+
+
+<script>
+  // Global parameters:
+  // do not resize the chart canvas when its container does (keep at 600x400px)
+Chart.defaults.global.responsive = true;
+
+  // define the chart data
+  var chartData = {
+  labels : [{% for item in labels6 %}
+               "{{item}}",
+              {% endfor %}],
+  datasets : [{
+    label: '{{ legend }}',
+    fill: true,
+    lineTension: 0.1,
+    backgroundColor: "rgba(75,192,192,0.4)",
+    borderColor: "rgba(75,192,192,1)",
+    borderCapStyle: 'butt',
+    borderDash: [],
+    borderDashOffset: 0.0,
+    borderJoinStyle: 'miter',
+    pointBorderColor: "rgba(75,192,192,1)",
+    pointBackgroundColor: "#fff",
+    pointBorderWidth: 1,
+    pointHoverRadius: 5,
+    pointHoverBackgroundColor: "rgba(75,192,192,1)",
+    pointHoverBorderColor: "rgba(220,220,220,1)",
+    pointHoverBorderWidth: 2,
+    pointRadius: 1,
+    pointHitRadius: 10,
+    data : [{% for item in values6 %}
+                  {{item}},
+                {% endfor %}],
+    spanGaps: false
+  },
+  {
+    label: '{{ legend }}',
+    fill: true,
+    lineTension: 0.1,
+    backgroundColor: "rgba(80,180,196,0.5)",
+    borderColor: "rgba(255,0,0,1)",
+    borderCapStyle: 'butt',
+    borderDash: [],
+    borderDashOffset: 0.0,
+    borderJoinStyle: 'miter',
+    pointBorderColor: "rgba(255,0,0,1)",
+    pointBackgroundColor: "#fff",
+    pointBorderWidth: 1,
+    pointHoverRadius: 5,
+    pointHoverBackgroundColor: "rgba(255,0,0,1)",
+    pointHoverBorderColor: "rgba(220,220,220,1)",
+    pointHoverBorderWidth: 2,
+    pointRadius: 1,
+    pointHitRadius: 10,
+    data : [{% for item in values6 %}
+                  {{item}},
+                {% endfor %}],
+    spanGaps: false
+  }
+]
+}
+
+  // get chart canvas
+var holder = document.getElementById("myChart6");
+var ctx = document.getElementById("myChart6").getContext("2d");
+
+  // create the chart using the chart canvas
+var myChart6 = new Chart(ctx, {
+  type: 'line',
+  data: chartData,
+  options: {
+    tooltips: {
+      enabled: true,
+      mode: 'single',
+      callbacks: {
+        label: function(tooltipItems, data) {
+          return tooltipItems.yLabel + ' dollar';
+        }
+      }
+    },
+  }
+});
+  
+
+</script>
+<script>
+  // Global parameters:
+  // do not resize the chart canvas when its container does (keep at 600x400px)
+  Chart.defaults.global.responsive = true;
+
+  var dateLabels = [{% for item in labels6 %}
+  "{{item}}",
+    {% endfor %}];
+
+    
+  var dataValues = [{% for item in values6 %}
+  {{ item }},
+{% endfor %}];
+
+   // Function to group data by month
+   function groupDataByMonth(labels, values) {
+    var groupedData = {};
+    for (var i = 0; i < labels.length; i++) {
+      var date = new Date(labels[i]);
+      var month = date.toLocaleString('default', { month: 'long' });
+      if (!groupedData[month]) {
+        groupedData[month] = 0;
+      }
+      groupedData[month] += values[i];
+    }
+    return {
+      labels: Object.keys(groupedData),
+      values: Object.values(groupedData)
+    };
+  }
+
+  var groupedData = groupDataByMonth(dateLabels, dataValues);
+
+  // Define the chart data using the grouped data
+  var chartData = {
+    labels: groupedData.labels,
+    datasets: [{
+      label: '{{ legend }}',
+      data: groupedData.values,
+      backgroundColor: 'rgba(75, 192, 192, 0.4)',
+      borderColor: 'rgba(75, 192, 192, 1)',
+      borderWidth: 1
+    }]
+  };
+
+  // Get chart canvas
+  var ctx = document.getElementById('myChart16').getContext('2d');
+
+  // Create the chart using the chart canvas
+  var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: chartData,
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    },
+  });
+</script>
+
+
+{% endblock %}

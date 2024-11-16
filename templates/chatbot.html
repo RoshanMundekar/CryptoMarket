@@ -1,0 +1,308 @@
+{% extends 'header1.html'%}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='chat_css/bot.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='chat_js/main.js') }}">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!--<script src="{{ url_for('static',filename='js/jquery-3.4.1.slim.js')}}"></script>-->
+<section class="w3l-contacts-12">
+    <div class="container" style="width: 4500px;">
+        <div class="col-md-6 offset-md-3" style="background-color:#ffffcc; border-radius: 12px;">
+            <div class="panel">
+                <!--Heading-->
+                <div class="panel-heading">
+                    <div class="panel-control">
+                        <div class="btn-group">
+                            <!--<button class="btn btn-default" type="button" data-toggle="collapse" data-target="#demo-chat-body"><i class="fa fa-chevron-down"></i></button>
+                            <button type="button" class="btn btn-default" data-toggle="dropdown"><i class="fa fa-gear"></i></button>-->
+                        </div>
+                    </div>
+                    <strong><h3 class="panel-title">Stock market chatbot</h3></strong>
+                </div>
+                <!--Widget body-->
+                <div>
+                    <div class="nano has-scrollbar" style="height:380px">
+                        <div class="nano-content pad-all" id="chatbox" tabindex="0" style="right: -17px;padding:10px;">
+                            <ul class="" id="messages" style="max-height: 360px;">
+                            </ul>
+                        </div>
+                    <div class="nano-pane"><div class="nano-slider" style="height: 141px; transform: translate(0px, 0px);"></div></div></div>
+
+                    <!--Widget footer-->
+                    <div class="panel-footer" style="padding:10px">
+                        <div class="" align="justify">
+                            <div id="userInput">
+                                <div id="upImage" style="display :none;">
+                                    <p class="botText"><span>Please Upload the Patient X-Ray</span></p>
+                                    <form method="post" id="upload-file" action="predict" enctype="multipart/form-data">
+                                       
+                                       
+                                        <input  type="file" name="file" accept=".png, .jpg, .jpeg">
+                                        <input  type="button" id="btnpredict" value="submit" class="btn btn-success">
+                                       
+                                        <h3 id="result"><span> </span></h3>
+                                    </form>
+                                    
+                                    <h3>
+                                </div>
+                            <div class="col-xs-9">
+                                <input type="text" placeholder="Enter your text" name="textInput" id="textInput" autocomplete="on" class="form-control">
+                                <button class="btn btn-primary"  id="buttonInput" type="submit">Send</button>
+                            </div>
+                            
+                        </div>
+                        <h3 id="result_msg"><span> </span></h3>    
+                    </div>
+                    <br>
+                  
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+ <script>
+                function getBotResponse()
+                {
+                    var rawText = $("#textInput").val();
+                    console.log(rawText);
+                    //var userHtml = '<p><span style="color:blue">' + rawText + '</span></p>';
+                    var userHtml = '<li><div class="media-body pad-hor speech-right"><div class="speech" style="color: white;"><p>' + rawText + '</p></div></div></li><br>';
+                    $("#textInput").val("");
+                    $("#chatbox ul").append(userHtml);
+                    //$("#messages").animate({scrollTop: $('#messages').prop("scrollHeight")}, 1000);
+                    $("#chatbox").animate({scrollTop: $('#messages').prop("scrollHeight")}, 1000);
+                    $.get("/get", { msg: rawText }).done(function(data)
+                    {
+                         var data1=data.split(",");
+                         if(data1[0] == 'image')
+                         {
+                            //alert("image");
+                            $("#result_msg").text(data1[1]);
+                            $("#upImage").show();
+                         }
+                        else{
+                            //var botHtml = '<p><span style="color:black">' + data + '</span></p>';
+                            var botHtml = ' <li class="mar-btm"><div class="media-body pad-hor"><div class="speech"><p>' + data + '</p></div></div></li> <br>';
+                            $("#chatbox ul").append(botHtml);
+                            //$("#messages").animate({scrollTop: $('#messages').prop("scrollHeight")}, 1000);
+                            $("#chatbox").animate({scrollTop: $('#messages').prop("scrollHeight")}, 1000);
+                        }
+
+
+                    });
+                }
+                $("#textInput").keypress(function(e) {
+                    if(e.which == 13) {
+                        getBotResponse();
+                    }
+                });
+                $("#buttonInput").click(function() {
+                    getBotResponse();
+                })
+
+
+
+          </script>
+           <script>
+            // Predict
+          $('#btnpredict').click(function () {
+  
+              alert("/predict");
+              var form_data = new FormData($('#upload-file')[0]);
+      
+              // Show loading animation
+              $(this).hide();
+              $('.loader').show();
+      
+              // Make prediction by calling api /predict
+              $.ajax({
+                  type: 'POST',
+                  url: '/predict',
+                  data: form_data,
+                  contentType: false,
+                  cache: false,
+                  processData: false,
+                  async: true,
+                  success: function (data) {
+                      // Get and display the result
+                      $('.loader').hide();
+                      $('#result').fadeIn(600);
+                      $('#result').text(' Patient Diagnosis of Chest status:  ' + data);
+                      console.log('Success!');
+                      alert("success");
+                  },
+              });
+          });
+                
+        </script>
+<link href="{{ url_for('static',filename='chat_css/jquery-ui.structure.css')}}">
+<script type="text/javascript" src="{{ url_for('static',filename='chat_js/jquery-ui.js')}}"></script>
+<!-- <script>
+    $(function() {
+        var availableTags = ['Hi', 'How are you', 'Is anyone there?', 'Hello', 'Good day', 'Whats up', 'how are ya', 'heyy', 'whatsup', 'cya', 'See you later', 'Goodbye', 'I am Leaving', 'Bye', 'Have a Good day', 'talk to you later', 'tyyl', 'i got to go', 'gtg', 'what is your name', 'what should I call you', 'whats your name?', 'what are you', 'who are you', 'who is this', 'what am i chatting to', 'who am i taking to', 'who created you', 'who are your developers', 'developers', 'creators', 'who made you', 'who designed you', 'when are you guys open', 'what are your hours', 'hours of operation', 'What is your contact no', 'Contact number?', 'how to call you', 'College phone no?', 'how can i contact you', 'Can i get your phone number', 'how can i call you', 'phone number', 'phone no', 'call', 'What are the courses available', 'what are the branches', 'Which departments are available?', 'about the courses', 'Which courses do you offer', 'What kind of courses are there?', 'What are offered', 'branches', 'what is the fees', 'how much is the fees', 'fees for first year', 'fees', 'about the fees', 'tell me something about the fees', 'where is college', 'how to reach college', 'college location', 'wheres the college', 'how can I reach college', 'whats is the college address', 'what is the address of college', 'address', 'location', 'Does college provide hostel', 'Is there any hostel', 'Where is hostel', 'do you have hostel', 'do you guys have hostel', 'hostel', 'What events are conducted in college', 'Are there any event held at college', 'Events?', 'functions', 'what are the events', 'tell me about events', 'what about events', 'What document are required for admission', 'Which document to bring for admission', 'documents', 'what documents do i need', 'what documents do I need for admission', 'documents needed', 'How many floors does college have', 'floors in college', 'floors in college', 'how tall is Shivajirao S. Jondhale College Of Engineering building', 'floors', 'Syllabus for CO', 'what is the Computer Engineering syllabus', 'syllabus', 'timetable', 'timetable for Electronics and Telecommunication', 'timetable for production', 'timetable for First Year', 'timetable for Mechanical Engineering', 'timetable for production', 'what is Comps syllabus', 'syllabus', 'What is next lecture', 'Where is library', 'Library', 'Tell me about library', 'how many libraries', 'how is college infrastructure', 'infrastructure', 'college infrastructure', 'Is there a cafetaria in college', 'Does college have canteen', 'Where is canteen', 'where is cafetaria', 'canteen', 'Cafetaria', 'Whats there on menu', 'what is available in college canteen', 'what foods can we get in college canteen', 'What is college placement', 'Which companies visit in college', 'What is average package', 'companies visit', 'package', 'placement', 'recruitment', 'companies', 'Who is IT HOD', 'Where is IT HOD', 'it hod', 'name of it hod', 'Who is computer HOD', 'Where is computer HOD', 'comps hod', 'name of comps hod', 'Who is Head of Department of Computer Engineering', 'Who is EXTC HOD', 'Where is EXTC HOD', 'Who is electronics and telecommunication hod', 'extc hod', 'name of extc hod', 'Who is Mechanical Department HOD', 'Where is mech HOD', 'Who is mechanical hod', 'mech hod', 'name of mechanical department hod', 'Who is Production Department HOD', 'Where is prod HOD', 'Who is production hod', 'production hod', 'name of production hod', 'Who is ETRX HOD', 'Where is ETRX HOD', 'Who is electronics hod', 'etrx hod', 'name of etrx hod', 'Who is FE HOD', 'who is First Year HOD', 'Who is first year hod', 'fe hod', 'name of fe hod', 'Who is college principal', "Where is principal's office", 'principal', 'name of principal', 'Where to check revaluation result', 'when will be reval result out', 'kt', 'revaluation result', 'kt result', 'when is the kt result', 'How to take admission in Shivajirao S Jondhale College of Engineering ', 'What is the process for admission', 'admission', 'admission process', 'Where to fill exam form', 'Is exam form out', 'exam form', 'about exam form', 'Whom to contact for internship', 'Does college provide internship', 'internship', 'Tell me about IV', 'Where do we go for IV', 'Give me IV details', 'iv', 'about Industrial Visit', 'What facilities college provide', 'College facility', 'What are college facilities', 'facilities', 'facilities provided', 'What is college intake', 'how many stundent are taken in each branch', 'seat allotment', 'seats', 'Does college have an uniform', 'Is there any uniform', 'uniform', ' what about uniform', 'do we have to wear uniform', 'different committee in college', 'Are there any committee in college', 'Give me committee details', 'committee', 'how many committee are there in college', 'I love you', 'Will you marry me', 'Do you love me', 'fuck', 'bitch', 'shut up', 'hell', 'stupid', 'idiot', 'dumb ass', 'bhenchod', 'madarchod', 'wtf', 'fuck off', 'When is vacation', 'When is holidays', 'how long will be the vacation', 'Thank You', 'its ok', 'Thanks', 'k', 'ok', 'okay', 'Thankyou so much', 'what can u do for me', 'how u can help me', 'why i should use you', 'when is the hackahton', 'what are the domains of hackathon', 'hackathon started', 'What is the college rank?', 'What is the NAAC rank?', 'is the college affiliated?', 'is it autonomous?', 'is it under VTU?', 'When was the college established?', 'What are the placements?', 'How are the placements?', 'Is the placements good?', 'Where can i contact the college?', 'What is the mail ID?', 'Can i get the email id?', 'What is the phone number?', 'Does the college have a fest?', 'is there a cultural fest?', 'How are you', 'hru', 'Hello how are you?', 'You doing good?', 'Feeling well?', 'What is SSJCE email', 'college email id', 'email id  shivajirao jondhale college of engineering ', 'Tell me principals email id', 'principal email id', 'Principal Contact details', 'College website', 'Official website', 'college official website', 'attendance', 'minimum attendance', 'what is the minimum attendance', 'how many classes should we attend', 'Do all subjects have pracical', 'All subject practical?', 'Are there only practical subjects or both theory and practical', 'Theory and practical subjects', 'What are the sport activities available?', 'Which sports team is there in SSJCE?', 'Can you list the games played?', 'Is physical activities given priority?', 'Atkt?', 'kt?passing criteria?', 'How to clear backlogs', 'How to clear kt', 'Tell about kt exam.', 'faculty info', 'faculty?', 'are the faculties qualified?', 'id?', 'id card', 'what happens if I lose my ID card?', 'ID card lost?', 'no ragging?', 'ragging free campus?', 'does ragging happens?', 'timing of college', 'what is college timing', 'working days', 'when are you guys open', 'what are your hours', 'hours of operation', 'when is the college open', 'college timing', 'what about college timing', 'is college open on saturday', 'tell something about college timing', 'what is the college  hours', 'when should i come to college', 'when should i attend college', 'what is my college time', 'college timing', 'timing college', 'exam dates', 'exam schedule', 'When is semester exam', 'Semester exam timetable', 'sem', 'semester', 'exam', 'when is exam', 'exam timetable', 'exam dates', 'when is semester'];
+        $("#textInput").autocomplete({
+          source: availableTags
+        });
+    });
+</script> -->
+
+
+<style>
+    .panel {
+        box-shadow: 0 2px 0 rgba(0,0,0,0.075);
+        border-radius: 0;
+        border: 0;
+        margin-bottom: 24px;
+    }
+    .panel .panel-heading, .panel>:first-child {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+    .panel-heading {
+        position: relative;
+        height: 50px;
+        padding: 0;
+        border-bottom:1px solid #eee;
+    }
+    .panel-control {
+        height: 100%;
+        position: relative;
+        float: right;
+        padding: 0 15px;
+    }
+    .panel-title {
+        font-weight: normal;
+        padding: 0 20px 0 20px;
+        font-size: 1.416em;
+        line-height: 50px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .panel-control>.btn:last-child, .panel-control>.btn-group:last-child>.btn:first-child {
+        border-bottom-right-radius: 0;
+    }
+    .panel-control .btn, .panel-control .dropdown-toggle.btn {
+        border: 0;
+    }
+    .nano {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+    .nano>.nano-content {
+        position: absolute;
+        overflow: scroll;
+        overflow-x: hidden;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+    .pad-all {
+        padding: 15px;
+    }
+    .mar-btm {
+        margin-bottom: 15px;
+    }
+    .media-block .media-left {
+        display: block;
+        float: left;
+    }
+    .img-sm {
+        width: 46px;
+        height: 46px;
+    }
+    .media-block .media-body {
+        display: block;
+        overflow: hidden;
+        width: auto;
+    }
+    .pad-hor {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    .speech {
+        position: relative;
+        background-color: #44C551;
+        color: #FBFBFB;
+        display: inline-block;
+        border-radius: 25px;
+        padding: 12px 20px;
+    }
+    .speech:before {
+        /* content: ""; */
+        display: block;
+        position: absolute;
+        width: 0;
+        height: 0;
+        left: 0;
+        top: 0;
+        border-top: 7px solid transparent;
+        border-bottom: 7px solid transparent;
+        border-right: 7px solid #b7dcfe;
+        margin: 15px 0 0 -6px;
+    }
+    .speech-right>.speech:before {
+        left: auto;
+        right: 0;
+        border-top: 7px solid transparent;
+        border-bottom: 7px solid transparent;
+        border-left: 7px solid #ffdc91;
+        border-right: 0;
+        margin: 15px -6px 0 0;
+    }
+    .speech .media-heading {
+        font-size: 1.2em;
+        color: #317787;
+        display: block;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        font-weight: 300;
+    }
+    .speech-time {
+        margin-top: 20px;
+        margin-bottom: 0;
+        font-size: .8em;
+        font-weight: 300;
+    }
+    .media-block .media-right {
+        float: right;
+    }
+    .speech-right {
+        text-align: right;
+    }
+    .pad-hor {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    .speech-right>.speech {
+        border-radius: 25px;
+        color: #333333;
+        background-color: #EEEDF2;
+        text-align: right;
+    }
+    .speech-right>.speech .media-heading {
+        color: #a07617;
+    }
+
+
+    .nano>.nano-pane {
+        background-color: rgba(0,0,0,0.1);
+        position: absolute;
+        width: 5px;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        opacity: 0;
+        -webkit-transition: all .7s;
+        transition: all .7s;
+    }
+
+</style>
+
+    
+{% endblock %}
